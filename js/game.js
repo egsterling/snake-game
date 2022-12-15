@@ -19,8 +19,8 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-let tokenX = getRandomInt(0, 38) * 20;
-let tokenY = getRandomInt(0, 28) * 20;
+let tokenX = getRandomInt(0, 31) * 25;
+let tokenY = getRandomInt(0, 23) * 25;
 
 function clearScreen() {
     ctx.fillStyle = "black";
@@ -35,13 +35,33 @@ function drawRect(x, y, token) {
         ctx.fillStyle = "red";
     }
     ctx.beginPath();
-    ctx.rect(x, y, 20, 20);
+    ctx.rect(x, y, 25, 25);
     ctx.fill();
 }
 
+function setToken() {
+    tokenX = getRandomInt(0, 31) * 25;
+    tokenY = getRandomInt(0, 23) * 25;
+    snake.every(box => {
+        if(tokenX === box['x'] && tokenY === box['y']) {
+            console.log("recurse");
+            setToken();
+            return false;
+        }
+        return true;
+    })
+}
+
 function handleScore() {
-    tokenX = getRandomInt(0, 38) * 20;
-    tokenY = getRandomInt(0, 28) * 20;
+    // tokenX = getRandomInt(0, 31) * 25;
+    // tokenY = getRandomInt(0, 23) * 25;
+    // snake.every(box => {
+    //     if(tokenX === box['x'] && tokenY === box['y']) {
+    //         return false;
+    //     }
+    //     return true;
+    // })
+    setToken();
     size += 1;
     snakeSize.innerHTML = "Size: " + size;
 }
@@ -96,7 +116,6 @@ function endGame() {
 function runGame() {
     if(lost) {
         lost = false;
-        console.log(animationID);
         window.cancelAnimationFrame(animationID);
         endGame();
         return;
@@ -116,26 +135,26 @@ function runGame() {
     // console.log(x, y);
     switch(direction) {
         case "north":
-            y -= 20;
+            y -= 25;
             if(y < 0) {
-                y = 580;
+                y = 575;
             }
             break;
         case "south":
-            y += 20;
-            if(y > 580) {
+            y += 25;
+            if(y > 575) {
                 y = 0;
             }
             break;
         case "west":
-            x -= 20;
+            x -= 25;
             if(x < 0) {
-                x = 780;
+                x = 775;
             }
             break;
         case "east":
-            x += 20;
-            if(x > 780) {
+            x += 25;
+            if(x > 775) {
                 x = 0;
             }
             break;
