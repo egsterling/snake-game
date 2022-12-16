@@ -3,6 +3,15 @@ const gameOver = document.getElementById("gameOver");
 const playAgainButton = document.getElementById("playAgain");
 const ctx = game.getContext("2d");
 const snakeSize = document.getElementById("size");
+const directionMap = {
+    "ArrowUp": ["north", "south"],
+    "ArrowDown": ["south", "north"],
+    "ArrowLeft": ["west", "east"],
+    "ArrowRight": ["east", "west"]
+}
+const CANVAS_WIDTH = game.width;
+const CANVAS_HEIGHT = game.height;
+const BLOCK_SIZE = 25;
 let animationID = null;
 let direction = "east";
 let prevDir = "east";
@@ -10,7 +19,8 @@ let x = 0;
 let y = 0;
 let lost = false;
 let size = 1;
-
+let tokenX;
+let tokenY;
 let snake = [{"x": x, "y": y}];
 
 function getRandomInt(min, max) {
@@ -19,12 +29,15 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-let tokenX = getRandomInt(0, 31) * 25;
-let tokenY = getRandomInt(0, 23) * 25;
+function setToken() {
+    tokenX = getRandomInt(0, CANVAS_WIDTH / BLOCK_SIZE - 1) * BLOCK_SIZE;
+    tokenY = getRandomInt(0, CANVAS_HEIGHT / BLOCK_SIZE - 1) * BLOCK_SIZE;
+}
+
 
 function clearScreen() {
     ctx.fillStyle = "black";
-    ctx.fillRect(0, 0, game.width, game.height);
+    ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 }
 
 function drawRect(x, y, token) {
@@ -35,59 +48,33 @@ function drawRect(x, y, token) {
         ctx.fillStyle = "red";
     }
     ctx.beginPath();
-    ctx.rect(x, y, 25, 25);
+    ctx.rect(x, y, BLOCK_SIZE, BLOCK_SIZE);
     ctx.fill();
 }
 
-function setToken() {
-    tokenX = getRandomInt(0, 31) * 25;
-    tokenY = getRandomInt(0, 23) * 25;
-    snake.every(box => {
-        if(tokenX === box['x'] && tokenY === box['y']) {
-            console.log("recurse");
-            setToken();
-            return false;
+function checkTokenLocations(prospectiveX, prospectiveY) {
+    for(box of snake) {
+        if(prospectiveX === box['x'] && prospectiveY === box['y']) {
+            return true;
         }
-        return true;
-    })
+    }
+    return false;
 }
 
+
 function handleScore() {
-    // tokenX = getRandomInt(0, 31) * 25;
-    // tokenY = getRandomInt(0, 23) * 25;
-    // snake.every(box => {
-    //     if(tokenX === box['x'] && tokenY === box['y']) {
-    //         return false;
-    //     }
-    //     return true;
-    // })
     setToken();
+    while(checkTokenLocations(tokenX, tokenY)) {
+        console.log("under snake, reassigning");
+        setToken();
+    }
     size += 1;
     snakeSize.innerHTML = "Size: " + size;
 }
 
 function keyPress(event) {
-    switch(event.key) {
-        case "ArrowUp":
-            if(prevDir !== "south") {
-                direction = "north";
-            }
-            break;
-        case "ArrowDown":
-            if(prevDir !== "north") {
-                direction = "south";
-            }
-            break;
-        case "ArrowLeft":
-            if(prevDir !== "east") {
-                direction = "west";
-            }
-            break;
-        case "ArrowRight":
-            if(prevDir !== "west") {
-                direction = "east";
-            }
-            break;
+    if(directionMap[event.key] && prevDir !== directionMap[event.key][1]) {
+        direction = directionMap[event.key][0];
     }
 }
 
@@ -100,6 +87,7 @@ function startGame() {
     prevDir = "east";
     x = 0;
     y = 0;
+    setToken();
     gameOver.style.display = "none";
     playAgainButton.style.display = "none";
     game.style.display = "block";
@@ -132,7 +120,6 @@ function runGame() {
         drawRect(box['x'], box['y'], false);
         ++count;
     });
-    // console.log(x, y);
     switch(direction) {
         case "north":
             y -= 25;
